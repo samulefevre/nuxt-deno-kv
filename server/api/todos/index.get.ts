@@ -1,27 +1,37 @@
-import type { Kv } from '@deno/kv'
+import type { Kv, KvListIterator } from '@deno/kv'
+
+type Todos = {
+    id: string
+    text: string
+    createdAt: string
+}
 
 async function listTodos(kv: Kv) {
-    const records = await kv.list({
+    const records: KvListIterator<Todos> = kv.list({
         prefix: ['todos']
-    })
+    }, { consistency: 'strong' })
 
-    const todos = [];
-    for await (const res of records) {
-        todos.push({
-            id: res.key[1],
-            value: res.value
-        });
+    const todos: Todos[] = [];
+    for await (const todo of records) {
+        todos.push(todo.value);
     }
+
+    todos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
     return todos
 
 }
 
-export default defineEventHandler(async (event) => {
+export default eventHandler(async (event) => {
     const kv: Kv = await useKv()
 
+    console.log('accept', getHeader(event, 'accept'))
+    // setHeader(event, 'content-type', 'text/event-stream')
+
     if (getHeader(event, 'accept') === 'text/event-stream') {
-        const stream = await kv.watch([['todos']]).getReader()
+        setHeader(event, 'content-type', 'text/event-stream')
+
+        const stream = kv.watch([['todos']]).getReader()
 
         const body = new ReadableStream({
             async start(controller) {
@@ -48,11 +58,10 @@ export default defineEventHandler(async (event) => {
 
         return sendStream(event, body)
 
-    } else {
-        console.log('list todos')
-
-        return await listTodos(kv)
     }
 
+    console.log('list todos')
+
+    return await listTodos(kv)
 
 })

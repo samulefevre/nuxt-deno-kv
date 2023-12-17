@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'uncrypto'
 
 export default defineEventHandler(async (event) => {
     const kv = await useKv()
@@ -7,7 +7,11 @@ export default defineEventHandler(async (event) => {
 
     const { todo } = await readBody(event)
 
-    const result = await kv.set(['todos', id], todo)
+    const result = await kv.set(['todos', id], {
+        id,
+        text: todo,
+        createdAt: new Date().toISOString()
+    })
 
     return {
         result

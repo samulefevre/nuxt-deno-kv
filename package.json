@@ -17,6 +17,7 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
-    "@deno/kv": "^0.6.1"
+    "@deno/kv": "^0.6.1",
+    "uncrypto": "^0.1.3"
   }
 }
