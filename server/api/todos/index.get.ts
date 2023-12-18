@@ -1,6 +1,6 @@
 import type { Kv, KvListIterator } from '@deno/kv'
 
-type Todos = {
+export type Todos = {
     id: string
     text: string
     createdAt: string
@@ -18,30 +18,33 @@ async function listTodos(kv: Kv) {
 
     todos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
+    console.log('Listed todos', todos)
+
     return todos
 
 }
 
 export default eventHandler(async (event) => {
-    const kv: Kv = await useKv()
-
-    console.log('accept', getHeader(event, 'accept'))
-    // setHeader(event, 'content-type', 'text/event-stream')
+    const kv = await useKv() as Kv
 
     if (getHeader(event, 'accept') === 'text/event-stream') {
+        console.log('SSE request')
+
         setHeader(event, 'content-type', 'text/event-stream')
 
-        const stream = kv.watch([['todos']]).getReader()
+        const stream = kv.watch([['todos_updated']]).getReader()
 
         const body = new ReadableStream({
             async start(controller) {
                 while (true) {
                     try {
+                        console.log('Waiting for change')
                         if ((await stream.read()).done) {
                             return
                         }
 
                         const todos = await listTodos(kv)
+                        console.log('Sending list', todos)
                         const chunk = `data: ${JSON.stringify(todos)}\n\n`
                         controller.enqueue(new TextEncoder().encode(chunk))
                     } catch (e) {
@@ -54,14 +57,12 @@ export default eventHandler(async (event) => {
             }
         })
 
-        console.log('stream todos')
+
 
         return sendStream(event, body)
 
     }
 
-    console.log('list todos')
-
-    return await listTodos(kv)
+    return listTodos(kv)
 
 })

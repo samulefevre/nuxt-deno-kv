@@ -3,17 +3,10 @@ export default defineEventHandler(async (event) => {
 
     const { id } = await readBody(event)
 
-    const res = await kv.delete(['todos', id])
+    const op = kv.atomic()
+    op.delete(['todos', id])
+    op.set(['todos_updated'], true)
+    await op.commit()
 
-    if (!res) {
-        throw createError({
-            status: 404,
-            message: 'Could not find todo'
-        })
-    }
-
-
-    return {
-        message: 'deleted'
-    }
+    return { deleted: true }
 })

@@ -28,10 +28,10 @@ const state = reactive({
 
 const { data: todos } = await useFetch('/api/todos')
 
-const addTodo = () => {
+const addTodo = async () => {
   if (!state.todo) return
 
-  $fetch('/api/todos', {
+  await $fetch('/api/todos', {
     method: 'POST',
     body: { todo: state.todo },
   })
@@ -43,5 +43,13 @@ const deleteTodo = (id: string) => {
     body: { id },
   })
 }
+
+onMounted(() => {
+  new EventSource(`/api/todos`).addEventListener('message', (event) => {
+    console.log('event', event.data)
+    todos.value = JSON.parse(event.data)
+  })
+})
+
 
 </script>

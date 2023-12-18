@@ -7,13 +7,19 @@ export default defineEventHandler(async (event) => {
 
     const { todo } = await readBody(event)
 
-    const result = await kv.set(['todos', id], {
+    const todo2 = {
         id,
         text: todo,
         createdAt: new Date().toISOString()
-    })
-
-    return {
-        result
     }
+
+    const op = kv.atomic()
+    op.set(['todos', todo2.id], todo2)
+    op.set(['todos_updated'], true)
+    await op.commit()
+
+
+
+    return todo2
+
 })
