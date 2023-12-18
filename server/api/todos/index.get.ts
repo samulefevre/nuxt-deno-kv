@@ -1,9 +1,14 @@
-import type { Kv, KvListIterator } from '@deno/kv'
+import type { Kv, KvListIterator, KvEntry } from '@deno/kv'
 
 export type Todos = {
     id: string
     text: string
     createdAt: string
+}
+
+export type TodoStatus = {
+    status: 'added' | 'deleted' | null
+    value: Todos | null
 }
 
 async function listTodos(kv: Kv) {
@@ -32,7 +37,30 @@ export default eventHandler(async (event) => {
 
         setHeader(event, 'content-type', 'text/event-stream')
 
-        const stream = kv.watch([['todos_updated']]).getReader()
+        const stream = kv.watch([['todos_status']]).getReader()
+
+        /*  const body = new ReadableStream({
+              async start(controller) {
+                  while (true) {
+                      try {
+                          console.log('Waiting for change')
+                          if ((await stream.read()).done) {
+                              return
+                          }
+  
+                          const todos = await kv.get(['todos_updated'])
+                          console.log('Sending list', todos)
+                          const chunk = `data: ${JSON.stringify(todos)}\n\n`
+                          controller.enqueue(new TextEncoder().encode(chunk))
+                      } catch (e) {
+                          console.error(`Error refreshing list`, e)
+                      }
+                  }
+              },
+              cancel() {
+                  stream.cancel()
+              }
+          }) */
 
         const body = new ReadableStream({
             async start(controller) {
@@ -43,9 +71,17 @@ export default eventHandler(async (event) => {
                             return
                         }
 
-                        const todos = await listTodos(kv)
-                        console.log('Sending list', todos)
-                        const chunk = `data: ${JSON.stringify(todos)}\n\n`
+                        // const todos = await listTodos(kv)
+                        const todos = await kv.get(['todos_status']) as KvEntry<TodoStatus>
+
+                        console.log('Todos', todos)
+
+                        if (todos.value.status === null) {
+                            return
+                        }
+
+                        console.log('Sending list', todos.value)
+                        const chunk = `data: ${JSON.stringify(todos.value.value)}\n\n`
                         controller.enqueue(new TextEncoder().encode(chunk))
                     } catch (e) {
                         console.error(`Error refreshing list`, e)

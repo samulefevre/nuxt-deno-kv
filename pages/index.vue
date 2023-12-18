@@ -28,6 +28,8 @@ const state = reactive({
 
 const { data: todos } = await useFetch('/api/todos')
 
+console.log('todosListt', todos.value)
+
 const addTodo = async () => {
   if (!state.todo) return
 
@@ -47,7 +49,8 @@ const deleteTodo = (id: string) => {
 onMounted(() => {
   new EventSource(`/api/todos`).addEventListener('message', (event) => {
     console.log('event', event.data)
-    todos.value = JSON.parse(event.data)
+    // todos.value = JSON.parse(event.data)
+    todos.value = [JSON.parse(event.data), ...todos.value!]
   })
 })
 
