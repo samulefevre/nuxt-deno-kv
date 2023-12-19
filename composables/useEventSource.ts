@@ -3,7 +3,6 @@ type EventData = {
     value: any
 }
 
-
 export const useEventSource = (eventData: EventData, datas: any[]) => {
     const data = ref(datas)
 
@@ -15,7 +14,7 @@ export const useEventSource = (eventData: EventData, datas: any[]) => {
             data.value = uniqueArr
             break;
         case 'deleted':
-            data.value = datas.filter((todo: any) => todo.id !== eventData.value.id)
+            data.value = datas.filter((item: any) => item.id !== eventData.value.id)
             break;
         case 'updated':
             data.value = datas.map((item: any) => {
@@ -30,5 +29,4 @@ export const useEventSource = (eventData: EventData, datas: any[]) => {
     }
 
     return data
-
 }
