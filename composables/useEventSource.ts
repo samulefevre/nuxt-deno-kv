@@ -5,9 +5,6 @@ type EventData = {
 
 
 export const useEventSource = (eventData: EventData, datas: any[]) => {
-
-    console.log('eventDataZAA', eventData)
-
     const data = ref(datas)
 
     switch (eventData.status) {
