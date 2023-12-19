@@ -14,7 +14,10 @@ export default defineEventHandler(async (event) => {
 
     const op = kv.atomic()
     op.delete(['todos', id])
-    op.set(['todos_updated'], true)
+    op.set(['todos_status'], {
+        status: 'deleted',
+        value: todo.value
+    })
     // op.set(['todos_deleted'], todo.value)
     await op.commit()
 

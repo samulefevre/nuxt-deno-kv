@@ -67,12 +67,12 @@ export default eventHandler(async (event) => {
 
                         console.log('Todos', todos)
 
-                        if (todos.value.status === null) {
+                        /* if (todos.value.status === null) {
                             return
-                        }
+                        } */
 
                         console.log('Sending list', todos.value)
-                        const chunk = `data: ${JSON.stringify(todos.value.value)}\n\n`
+                        const chunk = `data: ${JSON.stringify(todos.value)}\n\n`
                         controller.enqueue(new TextEncoder().encode(chunk))
                     } catch (e) {
                         console.error(`Error refreshing list`, e)
