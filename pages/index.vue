@@ -13,6 +13,9 @@
             {{ todo.text }} - {{ todo.createdAt }}
           </div>
           <div>
+            <UToggle :model-value="Boolean(todo.completed)" @update:model-value="toggleTodo(todo)" />
+          </div>
+          <div>
             <UButton @click="deleteTodo(todo.id)">Delete</UButton>
           </div>
         </div>
@@ -22,6 +25,8 @@
 </template>
   
 <script setup lang="ts">
+import type { Todos } from '~/server/types/db';
+
 const state = reactive({
   todo: undefined,
 })
@@ -37,10 +42,17 @@ const addTodo = async () => {
   })
 }
 
-const deleteTodo = (id: string) => {
-  $fetch('/api/todos', {
+const deleteTodo = async (id: string) => {
+  await $fetch(`/api/todos/${id}`, {
     method: 'DELETE',
     body: { id },
+  })
+}
+
+const toggleTodo = async (todo: Todos) => {
+  await $fetch(`/api/todos/${todo.id}`, {
+    method: 'PATCH',
+    body: { completed: !todo.completed },
   })
 }
 
@@ -58,6 +70,14 @@ onMounted(() => {
           break;
         case 'deleted':
           todos.value = todos.value.filter((todo) => todo.id !== data.value.id)
+          break;
+        case 'updated':
+          todos.value = todos.value.map((todo) => {
+            if (todo.id === data.value.id) {
+              return data.value
+            }
+            return todo
+          })
           break;
         default:
           break;
