@@ -7,6 +7,6 @@ export type Todos = {
 }
 
 export type TodoStatus = {
-    status: 'added' | 'deleted' | null
+    status: 'added' | 'deleted' | 'updated'
     value: Todos | null
 }

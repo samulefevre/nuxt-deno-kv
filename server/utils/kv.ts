@@ -1,7 +1,9 @@
 import type { Kv } from '@deno/kv'
 
 export const useKv = async (): Promise<Kv> => {
+  // @ts-ignore
   if (globalThis.Deno) {
+    // @ts-ignore
     return await globalThis.Deno.openKv() as Kv
   }
   if (process.dev) {

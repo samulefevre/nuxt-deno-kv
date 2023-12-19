@@ -61,28 +61,8 @@ onMounted(() => {
     const data = JSON.parse(event.data)
 
     if (todos.value) {
-      switch (data.status) {
-        case "added":
-          let arr = [data.value, ...todos.value]
-          let uniqueArr = Array.from(new Set(arr.map(obj => obj.id))).map(id => arr.find(obj => obj.id === id));
-
-          todos.value = uniqueArr
-          break;
-        case 'deleted':
-          todos.value = todos.value.filter((todo) => todo.id !== data.value.id)
-          break;
-        case 'updated':
-          todos.value = todos.value.map((todo) => {
-            if (todo.id === data.value.id) {
-              return data.value
-            }
-            return todo
-          })
-          break;
-        default:
-          break;
-      }
-
+      const newDatas = useEventSource(data, todos.value)
+      todos.value = newDatas.value
     }
   })
 })
