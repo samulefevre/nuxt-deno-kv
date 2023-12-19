@@ -1,15 +1,6 @@
 import type { Kv, KvListIterator, KvEntry } from '@deno/kv'
 
-export type Todos = {
-    id: string
-    text: string
-    createdAt: string
-}
-
-export type TodoStatus = {
-    status: 'added' | 'deleted' | null
-    value: Todos | null
-}
+import type { Todos, TodoStatus } from '~/server/types/db'
 
 async function listTodos(kv: Kv) {
     const records: KvListIterator<Todos> = kv.list({

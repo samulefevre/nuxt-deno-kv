@@ -35,7 +35,7 @@ const addTodo = async () => {
 
   await $fetch('/api/todos', {
     method: 'POST',
-    body: { todo: state.todo },
+    body: { text: state.todo },
   })
 }
 

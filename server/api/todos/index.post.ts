@@ -1,23 +1,22 @@
 import { randomUUID } from 'uncrypto'
+import { z } from 'zod'
 
 export default defineEventHandler(async (event) => {
     const kv = await useKv()
 
-    const id = randomUUID()
-
-    const { todo } = await readBody(event)
-
-    const todo2 = {
-        id,
-        text: todo,
-        createdAt: new Date().toISOString()
-    }
+    const todo = await readValidatedBody(event, z.object({
+        id: z.string().optional().default(() => randomUUID()),
+        text: z.string().trim().min(1),
+        completed: z.boolean().default(false),
+        createdAt: z.string().default(Date),
+        updatedAt: z.string().default(Date),
+    }).parse)
 
     const op = kv.atomic()
-    op.set(['todos', todo2.id], todo2)
+    op.set(['todos', todo.id], todo)
     op.set(['todos_status'], {
         status: 'added',
-        value: todo2
+        value: todo
     })
 
     const res = await op.commit()
@@ -28,12 +27,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    /* setTimeout(() => {
+        kv.set(['todos_status'], {
+            status: null,
+            value: null
+        })
+    }, 3000); */
 
-    await kv.set(['todos_status'], {
-        status: null,
-        value: null
-    })
 
-    return todo2
+    return todo
 
 })
