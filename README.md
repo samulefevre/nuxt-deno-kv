@@ -1,6 +1,6 @@
-# Nuxt 3 Minimal Starter
+# Nuxt 3 Todos Deno KV
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+![Demo](https://github.com/samulefevre/nuxt-deno-kv/assets/17186421/616499e0-cc23-4695-b874-6a208098b402)
 
 ## Setup
 
