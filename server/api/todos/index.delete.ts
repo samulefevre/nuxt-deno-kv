@@ -1,10 +1,12 @@
 export default defineEventHandler(async (event) => {
     const kv = await useKv()
 
-    const op = kv.atomic()
-    op.delete(['todos'])
-    op.delete(['todos_status'])
+    const iter = kv.list<string>({ prefix: ['todos'] })
 
+    const op = kv.atomic()
+    for await (const res of iter) {
+        op.delete(res.key)
+    };
     await op.commit()
 
     return { deleted: true }

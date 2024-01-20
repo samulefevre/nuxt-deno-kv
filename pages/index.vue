@@ -81,7 +81,7 @@ const toggleTodo = async (todo: Todos) => {
 }
 
 onMounted(() => {
-  const { data } = useEventSource('/api/todos')
+  const { data, close } = useEventSource('/api/todos')
 
   watch(data, (newData) => {
     if (todos.value && newData) {
@@ -89,6 +89,12 @@ onMounted(() => {
       todos.value = newDatas.value
     }
   })
+
+  onUnmounted(() => {
+    close()
+  })
 })
+
+
 
 </script>
