@@ -1,7 +1,8 @@
 <template>
   <UContainer class="py-8">
     <h1 class="font-bold text-3xl">Todos</h1>
-    {{ todos }}
+    <UButton @click="deleteAllTodos" icon="i-heroicons-trash-20-solid" color="red" variant="soft" size="xl"
+      label="delete all" class="mt-4" />
     <form class="mt-6 flex gap-2" @submit.prevent="addTodo">
       <UInput v-model="state.todo" size="xl" required placeholder="Add a todo item" class="flex-1" />
       <UButton size="xl" type="submit" color="green" icon="i-heroicons-plus-20-solid" :loading="loading" />
@@ -31,7 +32,7 @@
 import type { Todos } from '~/server/types/db';
 import { UseTimeAgo } from '@vueuse/components'
 
-const { copy } = useCopyToClipboard()
+import { useEventSource } from '@vueuse/core'
 
 const state = reactive({
   todo: undefined,
@@ -62,6 +63,16 @@ const deleteTodo = async (id: string) => {
   })
 }
 
+const deleteAllTodos = async (id: string) => {
+  const res = await $fetch(`/api/todos`, {
+    method: 'DELETE',
+  })
+
+  if (res) {
+    todos.value = []
+  }
+}
+
 const toggleTodo = async (todo: Todos) => {
   await $fetch(`/api/todos/${todo.id}`, {
     method: 'PATCH',
@@ -70,11 +81,12 @@ const toggleTodo = async (todo: Todos) => {
 }
 
 onMounted(() => {
-  new EventSource(`/api/todos`).addEventListener('message', (event) => {
-    const data = JSON.parse(event.data)
+  const { data } = useEventSource('/api/todos')
 
-    if (todos.value) {
-      const newDatas = useEventSource(data, todos.value)
+  watch(data, (newData) => {
+    console.log('newData', newData)
+    if (todos.value && newData) {
+      const newDatas = useEventDataSource(JSON.parse(newData), todos.value)
       todos.value = newDatas.value
     }
   })

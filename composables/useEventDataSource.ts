@@ -1,9 +1,9 @@
-type EventData = {
+export type EventData = {
     status: 'added' | 'deleted' | 'updated'
     value: any
 }
 
-export const useEventSource = (eventData: EventData, datas: any[]) => {
+export const useEventDataSource = (eventData: EventData, datas: any[]) => {
     const newDatas = ref(datas)
 
     switch (eventData.status) {
