@@ -84,7 +84,6 @@ onMounted(() => {
   const { data } = useEventSource('/api/todos')
 
   watch(data, (newData) => {
-    console.log('newData', newData)
     if (todos.value && newData) {
       const newDatas = useEventDataSource(JSON.parse(newData), todos.value)
       todos.value = newDatas.value
