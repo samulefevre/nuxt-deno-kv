@@ -1,6 +1,7 @@
 <template>
   <UContainer class="py-8">
     <h1 class="font-bold text-3xl">Todos</h1>
+    {{ todos }}
     <form class="mt-6 flex gap-2" @submit.prevent="addTodo">
       <UInput v-model="state.todo" size="xl" required placeholder="Add a todo item" class="flex-1" />
       <UButton size="xl" type="submit" color="green" icon="i-heroicons-plus-20-solid" :loading="loading" />
